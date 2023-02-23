@@ -1,18 +1,15 @@
 let VD = 0
-let buffer ="0"
+let LD=[]
+let cnt=0
 //let previousDice
 function roll(){
     VD=getRndInteger(1,31);
     document.getElementById("Cock").value = VD;
-    //alert(VD)
+    cnt+=1
+    LD[cnt]=VD;
+    document.getElementById("PN").value = LD[(cnt-1)];
+    console.log(LD[cnt])   
 }
 function getRndInteger(min, max) {
     return Math.floor(Math.random() * (max - min) ) + min;
   }
-//const screen= document.querySelector('.screen');
-function buttonClick(value){
-    if(isNaN(value)){
-        VD=roll
-    }
-    screen.innerText = buffer;
-}

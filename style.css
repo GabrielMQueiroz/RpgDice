@@ -1,13 +1,17 @@
 html {
     box-sizing: border-box;
-    height: 100%;
+    height: auto;
+    width: auto;
+    margin-top: 10%;
+    margin-left: auto;
+    margin-right: auto;
 }
 *,
 *::before,
 *::after{
     box-sizing:inherit ;
-    margin: 0;
-    padding: 0;
+    margin: auto;
+    padding: auto;
 }
 body{
     align-items: center;
@@ -15,7 +19,7 @@ body{
     display:flex;
     font-family: 'Dosis,sans-serif';
     font-display: swap;
-    height: inherit;
+    height: 10%;
     justify-content: center;
 }
 .wrapper{
@@ -30,12 +34,12 @@ body{
     -webkit-backdrop-filter: blur(4px);
     background: rgba(35, 35, 35, 0.3);
     border: 1px solid(rgba(255,255,255,0.1));
-    flex-basis: 350px;
-    height: 200px;
-    padding: 20px,35px;
-    padding-left: 10px;
-    padding-top: 10px;
-    padding-right: 10px;
+    flex-basis: auto;
+    height: 90%;
+    width:auto;
+    padding-left: 5%;
+    padding-top: 5%;
+    padding-right: 5%;
 }
 .screen{
     backdrop-filter: blur(5.5px) ;
@@ -49,8 +53,20 @@ body{
     overflow: auto;
     padding: 20px;
     text-align: center;
-    width: 385px;
+    width: inherit;
 }
+.custom{
+    width: 90%;
+    height: inherit;
+}
+.custom input {
+    border: none;
+    background: #f2f2f2;
+    text-align: center;
+    border-radius: 10px;
+    width: inherit;
+    font-size: 50px;
+  }
 .RBR{
     display: flex;
     justify-content: space-between;
@@ -106,14 +122,20 @@ body{
     -webkit-backdrop-filter: blur(4px);
     background: rgba(35, 35, 35, 0.3);
     border: 1px solid(rgba(255,255,255,0.1));
+    text-align: center;
     flex-basis: 350px;
-    height: 200px;
-    padding-left: 10px;
-    padding-top: 20px;
-    margin-top: 50px;
+    height: 250px;
+    padding-top: 10%;
+    margin-top: 10%;
+    margin-bottom: 10%;
 }
-.pastnumber{
-
+.pastnum input{
+    border: none;
+    background: #f2f2f2;
+    text-align: center;
+    border-radius: 10px;
+    width: 20%;
+    font-size: 20px;
 }
 .double{
     flex-basis: 47%;

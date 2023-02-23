@@ -12,7 +12,9 @@
 <body>
     <div class="wrapper">
         <section class="screen">
-            <input type="text" value="0" id="Cock" maxlength="2" onkeydown="return false">
+            <label class="custom" aria-label="Your Roll :">
+                <input type="text" value="0" id="Cock" maxlength="2" onkeydown="return false">
+            </label>
         </section>
         <section class="rollbutton">
             <div class="RBR ">
@@ -25,9 +27,9 @@
             </div>
         </section>
         <section class="hist">
-            <div calss="pastnumber">
-
-            </div>
+            <label class="pastnum">
+                <input type="text" value="0" id="PN" maxlength="2" onkeydown="return false">                
+            </label>
         </section>
     </div>
     <script src="script.js"></script>
