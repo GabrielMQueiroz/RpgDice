@@ -12,20 +12,22 @@
 <body>
     <div class="wrapper">
         <section class="screen">
-            <input type="text" value="0" id="Cock" name="resultado" maxlength="2">
+            <input type="text" value="0" id="Cock" maxlength="2" onkeydown="return false">
         </section>
         <section class="rollbutton">
             <div class="RBR ">
                 <button onclick="roll()"class="Roll"> 
                     Roll
-
                 </button>
-                <button class="Type">
+                <button onclick="Type()"class="Type">
                     Type
                 </button>
+            </div>
+        </section>
+        <section class="hist">
+            <div calss="pastnumber">
 
             </div>
-
         </section>
     </div>
     <script src="script.js"></script>

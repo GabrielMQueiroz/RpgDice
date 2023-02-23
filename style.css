@@ -45,7 +45,7 @@ body{
     border-radius: 18px;
     box-shadow: 0 4px 30px rgba(35, 35,35, 0.1);
     color: black; 
-    font-size: 35px;
+    font-size: 40px;
     overflow: auto;
     padding: 20px;
     text-align: center;
@@ -76,7 +76,6 @@ body{
     background-color: rgb(213, 59, 7);
     
 }
-
 .Type{
     backdrop-filter: blur(5.5px);
     -webkit-backdrop-filter: blur(5.5px);
@@ -94,6 +93,27 @@ body{
 }
 .Type:active{
     background-color: rgb(7, 213, 155);
+}
+.hist{
+    backdrop-filter: blur(5.5px);
+    -webkit-backdrop-filter: blur(5.5px);
+    background: rgba(255, 255,255, 0.75);
+    border: 1px solid(255,255,255,0.01);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px  rgba(35, 35, 35, 0.1);
+    color: #1a1601;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    background: rgba(35, 35, 35, 0.3);
+    border: 1px solid(rgba(255,255,255,0.1));
+    flex-basis: 350px;
+    height: 200px;
+    padding-left: 10px;
+    padding-top: 20px;
+    margin-top: 50px;
+}
+.pastnumber{
+
 }
 .double{
     flex-basis: 47%;

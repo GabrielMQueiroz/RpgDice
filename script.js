@@ -2,7 +2,7 @@ let VD = 0
 let buffer ="0"
 //let previousDice
 function roll(){
-    VD=getRndInteger(1,30);
+    VD=getRndInteger(1,31);
     document.getElementById("Cock").value = VD;
     //alert(VD)
 }
