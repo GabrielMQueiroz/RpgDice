@@ -2,8 +2,8 @@ let VD = 0
 let LD=[]
 let cnt=0
 //let previousDice
-function roll(){
-    VD=getRndInteger(1,31);
+function roll(Dados){
+    VD=getRndInteger(1,Dados);
     document.getElementById("Cock").value = VD;
     cnt+=1
     LD[cnt]=VD;
@@ -12,6 +12,12 @@ function roll(){
     te=test()
     result=mean(te)
     console.log(result)
+}
+function type(){
+    var Dados=[1,2,4,6,10,12,20,30,100]
+    cnts=0
+    Dados=Dados[cnts]
+    return Dados
 }
 function getRndInteger(min, max) {
     return Math.floor(Math.random() * (max - min) ) + min;
