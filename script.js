@@ -9,7 +9,26 @@ function roll(){
     LD[cnt]=VD;
     document.getElementById("PN").value = LD[(cnt-1)];
     console.log(LD[cnt])   
+    te=test()
+    result=mean(te)
+    console.log(result)
 }
 function getRndInteger(min, max) {
     return Math.floor(Math.random() * (max - min) ) + min;
   }
+function mean(array){
+    let Valor=0
+    for(var i=0;i<array.length;i++){
+        Valor=array[i]+Valor
+    }
+    md=Valor/array.length
+    return md
+}
+function test(){
+    t=[]
+    for(var i=0;i<100;i++){
+        t[i]=getRndInteger(1,31)
+    }
+    console.log(t)
+    return t
+}
