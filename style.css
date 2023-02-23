@@ -33,6 +33,9 @@ body{
     flex-basis: 350px;
     height: 200px;
     padding: 20px,35px;
+    padding-left: 10px;
+    padding-top: 10px;
+    padding-right: 10px;
 }
 .screen{
     backdrop-filter: blur(5.5px) ;
@@ -53,10 +56,48 @@ body{
     justify-content: space-between;
     margin: 5% 0;
 }
+.Roll{
+    backdrop-filter: blur(5.5px);
+    -webkit-backdrop-filter: blur(5.5px);
+    border: 1px solid(rgba(255,255,255,0.1));
+    border-radius: 16px ;
+    box-shadow:0 4px 30px rgba(35,35,35,0.1);
+    flex-basis: 20%;
+    padding: 10px;
+    font-style: inherit;
+    font-size: 24px;
+    height: 65px;
+}
+.Roll:hover{
+    background-color: rgb(158, 163, 157);
+    color: rgb(7, 7, 7);
+}
+.Roll:active{
+    background-color: rgb(213, 59, 7);
+    
+}
+
 .Type{
     backdrop-filter: blur(5.5px);
     -webkit-backdrop-filter: blur(5.5px);
     border: 1px solid(rgba(255,255,255,0.1));
     border-radius: 16px ;
-    box-shadow:0 4px 30px rgba(35,35,35,0.1)
+    box-shadow:0 4px 30px rgba(35,35,35,0.1);
+    flex-basis: 20%;
+    padding: 10px;
+    font-style: inherit;
+    font-size: 24px;
+    height: 65px;
+}
+.Type:hover{
+    background-color: rgb(158, 163, 157);
+}
+.Type:active{
+    background-color: rgb(7, 213, 155);
+}
+.double{
+    flex-basis: 47%;
+}
+.triple{
+    flex-basis: 75%;
 }
