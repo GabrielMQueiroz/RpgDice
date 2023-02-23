@@ -15,12 +15,12 @@ function roll(){
     result=mean(te)
     console.log(result)
 }
-/*function dado(vet){
+function dado(){
     var cnts=0
     cnts++
     Dados=vet[cnts]
     console.log(cnts)
-}*/
+}
 //Qdad=dado()
 function getRndInteger(min, max) {
     return Math.floor(Math.random() * (max - min) ) + min;
@@ -41,4 +41,3 @@ function test(){
     console.log(t)
     return t
 }
-//console.log(Qdad)
