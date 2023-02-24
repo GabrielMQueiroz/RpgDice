@@ -11,10 +11,24 @@
 </head>
 <body>
     <div class="wrapper">
+        <section class="type">
+            <label class="Dad" aria-label="Your Roll :">
+                <input type="text" value="1D30" id="DAD" maxlength="2" onkeydown="return false">
+            </label>                    
+        </section>
         <section class="screen">
             <label class="custom" aria-label="Your Roll :">
                 <input type="text" value="0" id="Cock" maxlength="2" onkeydown="return false">
             </label>
+        </section>
+
+        <section class="MDice">
+            <button onclick="Sub()" class="Sub">
+                -
+            </button>
+            <button onclick="Add()" class="Add">
+                +
+            </button>
         </section>
         <section class="rollbutton">
             <div class="RBR ">
