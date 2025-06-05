@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG Dice Roller</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js v2.9.4 for compatibility with the box plot plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+    <script src="https://unpkg.com/chartjs-chart-box-and-violin-plot/build/Chart.BoxPlot.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Tailwind gray-900 */
+            color: #e2e8f0; /* Tailwind gray-300 */
+        }
+        .btn {
+            @apply px-6 py-3 rounded-lg font-semibold text-white shadow-md transition-all duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-opacity-75;
+        }
+        .btn-primary {
+            @apply bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500;
+        }
+        .btn-secondary {
+            @apply bg-gray-600 hover:bg-gray-700 focus:ring-gray-500;
+        }
+        .card {
+            @apply bg-gray-800 p-6 rounded-xl shadow-xl;
+        }
+        .input-group {
+            @apply space-y-1;
+        }
+        .input-label {
+            @apply block text-sm font-medium text-gray-400;
+        }
+        .input-field {
+            @apply w-full bg-gray-700 text-gray-200 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-colors shadow-sm placeholder-gray-500;
+        }
+        .history-item {
+            @apply bg-gray-700 p-3 rounded-md mb-2 text-sm flex justify-between items-center;
+        }
+        .history-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        .history-scroll::-webkit-scrollbar-track {
+            background: #2d3748; /* gray-800 */
+            border-radius: 10px;
+        }
+        .history-scroll::-webkit-scrollbar-thumb {
+            background: #4a5568; /* gray-600 */
+            border-radius: 10px;
+        }
+        .history-scroll::-webkit-scrollbar-thumb:hover {
+            background: #5f6e85; /* gray-500 */
+        }
+        #loadingIndicator { /* Kept for potential future non-Firebase loading states */
+            @apply fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 text-xl font-semibold hidden;
+        }
+        .modal {
+            @apply fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-40 transition-opacity duration-300;
+        }
+        .modal-content {
+            @apply bg-gray-800 p-8 rounded-lg shadow-xl max-w-md w-full;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 selection:bg-indigo-500 selection:text-white">
+
+    <div id="loadingIndicator">Loading...</div>
+
+    <div class="w-full max-w-4xl mx-auto space-y-8">
+        <header class="text-center">
+            <h1 class="text-4xl font-bold text-indigo-400">RPG Dice Roller</h1>
+            <p class="text-gray-400 mt-2">Roll your fate, check your luck! (History is local)</p>
+            <!-- User ID display removed -->
+        </header>
+
+        <main class="grid md:grid-cols-2 gap-8">
+            <!-- Dice Rolling Section -->
+            <section class="card space-y-6">
+                <h2 class="text-2xl font-semibold text-indigo-300">Roll the dice</h2>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="input-group">
+                        <label for="numDice" class="input-label">Number of Dice (1-100)</label>
+                        <input type="number" id="numDice" value="1" min="1" max="100" class="input-field" placeholder="e.g., 2">
+                    </div>
+                    <div class="input-group">
+                        <label for="diceType" class="input-label">Type of Dice (d<span id="diceTypeLabel">N</span>, min: d2)</label>
+                        <input type="number" id="diceType" value="6" min="2" class="input-field" placeholder="e.g., 20">
+                    </div>
+                </div>
+                <button id="rollButton" class="btn btn-primary w-full">Roll <span id="rollButtonLabel">1d6</span></button>
+
+                <div id="currentRollResult" class="mt-6 space-y-2 hidden">
+                    <h3 class="text-xl font-semibold text-indigo-300">Last Roll:</h3>
+                    <p class="text-lg">Total: <span id="rollTotal" class="font-bold text-2xl text-green-400">0</span></p>
+                    <p class="text-sm text-gray-400">Individual Rolls: <span id="individualRolls" class="text-gray-300"></span></p>
+                </div>
+            </section>
+
+            <!-- History Section -->
+            <section class="card space-y-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-semibold text-indigo-300">Roll History</h2>
+                    <button id="clearHistoryButton" class="btn btn-secondary btn-sm py-2 px-4 text-xs">Clear History</button>
+                </div>
+                <div id="rollHistory" class="history-scroll max-h-80 overflow-y-auto bg-gray-900 p-3 rounded-lg">
+                    <p id="noHistoryMessage" class="text-gray-500 text-center py-4">No rolls yet. Let's make some history!</p>
+                </div>
+            </section>
+        </main>
+
+        <!-- Visualization Section -->
+        <section class="card mt-8">
+            <h2 id="visualizationTitle" class="text-2xl font-semibold text-indigo-300 mb-4">Roll Distribution (Horizontal Violin Plot)</h2>
+            <div class="flex flex-col sm:flex-row gap-4 mb-4 items-center">
+                <label for="visualizeDiceType" class="input-label">Show stats for:</label>
+                <select id="visualizeDiceType" class="input-field sm:w-auto bg-gray-700">
+                    <option value="">Select Dice Type</option>
+                </select>
+                <p id="totalRollsForChart" class="text-sm text-gray-400 ml-auto">Total rolls: 0</p>
+            </div>
+            <div class="bg-gray-900 p-4 rounded-lg min-h-[250px]">
+                <canvas id="rollChart" height="200"></canvas>
+                 <p id="noChartDataMessage" class="text-gray-500 text-center py-10">Roll some dice and select a type to see the visualization!</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal for Messages/Confirmations -->
+    <div id="messageModal" class="modal hidden opacity-0">
+        <div class="modal-content">
+            <h3 id="modalTitle" class="text-xl font-semibold mb-4">Notification</h3>
+            <p id="modalMessage" class="text-gray-300 mb-6">This is a message.</p>
+            <div class="flex justify-end space-x-3">
+                <button id="modalCancelButton" class="btn btn-secondary hidden">Cancel</button>
+                <button id="modalConfirmButton" class="btn btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // No more Firebase imports needed
+        // Global Variables
+        let rollChartInstance = null;
+        let allHistoryItems = []; // Cache for history items
+
+        const numDiceInput = document.getElementById('numDice');
+        const diceTypeInput = document.getElementById('diceType');
+        const rollButton = document.getElementById('rollButton');
+        const rollButtonLabel = document.getElementById('rollButtonLabel');
+        const currentRollResultDiv = document.getElementById('currentRollResult');
+        const rollTotalSpan = document.getElementById('rollTotal');
+        const individualRollsSpan = document.getElementById('individualRolls');
+        const rollHistoryDiv = document.getElementById('rollHistory');
+        const noHistoryMessage = document.getElementById('noHistoryMessage');
+        const clearHistoryButton = document.getElementById('clearHistoryButton');
+        const visualizeDiceTypeSelect = document.getElementById('visualizeDiceType');
+        const visualizationTitle = document.getElementById('visualizationTitle');
+        
+        const rollChartElement = document.getElementById('rollChart'); 
+        const rollChartContext = rollChartElement.getContext('2d'); 
+
+        const noChartDataMessage = document.getElementById('noChartDataMessage');
+        const totalRollsForChart = document.getElementById('totalRollsForChart');
+        // userIdDisplay removed
+        const loadingIndicator = document.getElementById('loadingIndicator');
+
+        const messageModal = document.getElementById('messageModal');
+        const modalTitleEl = document.getElementById('modalTitle'); 
+        const modalMessageEl = document.getElementById('modalMessage'); 
+        const modalConfirmButton = document.getElementById('modalConfirmButton');
+        const modalCancelButton = document.getElementById('modalCancelButton');
+        let confirmCallback = null;
+
+        // --- Utility Functions (Modal and Loading) ---
+        function showLoading(message = "Loading...") { // Kept if needed for other async ops
+            loadingIndicator.textContent = message;
+            loadingIndicator.classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            loadingIndicator.classList.add('hidden');
+        }
+        
+        function showModal(title, message, isConfirm = false, onConfirm = null) {
+            modalTitleEl.textContent = title;
+            modalMessageEl.textContent = message;
+            modalCancelButton.classList.toggle('hidden', !isConfirm);
+            confirmCallback = isConfirm ? onConfirm : null;
+            
+            messageModal.classList.remove('hidden', 'opacity-0');
+            modalConfirmButton.onclick = () => {
+                hideModal();
+                if (isConfirm && typeof confirmCallback === 'function') {
+                    confirmCallback();
+                }
+            };
+            modalCancelButton.onclick = hideModal;
+        }
+
+        function hideModal() {
+            messageModal.classList.add('opacity-0');
+            setTimeout(() => messageModal.classList.add('hidden'), 300);
+        }
+
+        // --- Dice Rolling Logic ---
+        function rollDice(numDice, diceType) {
+            const rolls = [];
+            let total = 0;
+            for (let i = 0; i < numDice; i++) {
+                rolls.push(Math.floor(Math.random() * diceType) + 1);
+                total += rolls[i];
+            }
+            return { rolls, total };
+        }
+
+        // --- Local Storage History Management ---
+        const HISTORY_KEY = 'diceRollHistory';
+
+        function getLocalHistory() {
+            const historyJson = localStorage.getItem(HISTORY_KEY);
+            if (historyJson) {
+                try {
+                    return JSON.parse(historyJson);
+                } catch (e) {
+                    console.error("Error parsing local history:", e);
+                    return []; // Return empty if parsing fails
+                }
+            }
+            return [];
+        }
+
+        function saveLocalHistory(historyItems) {
+            try {
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(historyItems));
+            } catch (e) {
+                console.error("Error saving to local history:", e);
+                showModal("Storage Error", "Could not save history. Your browser's local storage might be full or disabled.");
+            }
+        }
+
+        async function handleRoll() {
+            const numDice = parseInt(numDiceInput.value);
+            const diceType = parseInt(diceTypeInput.value);
+
+            if (isNaN(numDice) || numDice < 1 || numDice > 100) {
+                showModal("Invalid Input", "Number of dice must be between 1 and 100.");
+                numDiceInput.focus();
+                return;
+            }
+            if (isNaN(diceType) || diceType < 2) {
+                showModal("Invalid Input", "Type of dice (sides) must be 2 or greater.");
+                diceTypeInput.focus();
+                return;
+            }
+
+            const { rolls, total } = rollDice(numDice, diceType);
+            currentRollResultDiv.classList.remove('hidden');
+            rollTotalSpan.textContent = total;
+            individualRollsSpan.textContent = rolls.join(', ');
+
+            // Save to Local Storage
+            const newRoll = {
+                numDice,
+                diceType,
+                rolls,
+                total,
+                timestamp: new Date().toISOString() // Local timestamp
+            };
+
+            const currentHistory = getLocalHistory();
+            currentHistory.push(newRoll);
+            saveLocalHistory(currentHistory);
+            
+            loadHistory(); // Reload and display updated history
+        }
+
+        function displayHistory(historyItems) {
+            allHistoryItems = historyItems; // Update cache
+            rollHistoryDiv.innerHTML = '';
+            const uniqueDiceTypes = new Set();
+
+            if (historyItems.length === 0) {
+                noHistoryMessage.classList.remove('hidden');
+                visualizeDiceTypeSelect.innerHTML = '<option value="">Select Dice Type</option>';
+                updateVisualization();
+                return;
+            }
+            noHistoryMessage.classList.add('hidden');
+
+            // Sort by timestamp descending (newest first). ISO strings can be compared directly.
+            historyItems.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+
+            historyItems.forEach(item => {
+                const historyElement = document.createElement('div');
+                historyElement.classList.add('history-item');
+                // Parse ISO string to Date object for formatting
+                const date = new Date(item.timestamp).toLocaleString(); 
+                const rollsString = Array.isArray(item.rolls) ? item.rolls.join(', ') : 'N/A';
+                historyElement.innerHTML = `
+                    <span>
+                        <strong class="text-indigo-400">${item.numDice}d${item.diceType}</strong> = ${item.total}
+                        <span class="text-xs text-gray-500 ml-1">(${rollsString})</span>
+                    </span>
+                    <span class="text-xs text-gray-500">${date}</span>`;
+                rollHistoryDiv.appendChild(historyElement);
+                uniqueDiceTypes.add(item.diceType);
+            });
+
+            const currentSelectedVizType = visualizeDiceTypeSelect.value;
+            visualizeDiceTypeSelect.innerHTML = '<option value="">Select Dice Type</option>';
+            Array.from(uniqueDiceTypes).sort((a, b) => a - b).forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = `d${type}`;
+                visualizeDiceTypeSelect.appendChild(option);
+            });
+
+            if (uniqueDiceTypes.has(parseInt(currentSelectedVizType))) {
+                visualizeDiceTypeSelect.value = currentSelectedVizType;
+            } else if (visualizeDiceTypeSelect.options.length > 1) {
+                // Select the first available dice type if previous one is gone or not set
+                visualizeDiceTypeSelect.value = visualizeDiceTypeSelect.options[1].value;
+            }
+            updateVisualization();
+        }
+
+        function loadHistory() {
+            // No async operation for loading, but keep structure if needed later
+            const localHistory = getLocalHistory();
+            displayHistory(localHistory);
+        }
+
+        function clearHistory() {
+            showModal("Confirm Clear", "Are you sure you want to delete all local roll history? This action cannot be undone.", true, () => {
+                localStorage.removeItem(HISTORY_KEY);
+                allHistoryItems = []; // Clear cache
+                displayHistory([]); // Update UI to show empty history
+                visualizeDiceTypeSelect.value = ""; // Reset visualization dropdown
+                updateVisualization(); // Update/clear chart
+                console.log("Local history cleared.");
+            });
+        }
+        
+        function updateVisualization() {
+            const selectedDiceType = parseInt(visualizeDiceTypeSelect.value);
+            const chartType = 'horizontalViolin'; 
+            visualizationTitle.textContent = `Roll Distribution (Horizontal Violin Plot)`;
+
+
+            if (rollChartInstance) {
+                rollChartInstance.destroy();
+                rollChartInstance = null;
+            }
+
+            if (isNaN(selectedDiceType) || allHistoryItems.length === 0) {
+                noChartDataMessage.classList.remove('hidden');
+                totalRollsForChart.textContent = "Total rolls: 0";
+                rollChartElement.style.height = '50px'; 
+                return;
+            }
+
+            const rollsForType = allHistoryItems
+                .filter(item => item.diceType === selectedDiceType)
+                .flatMap(item => Array.isArray(item.rolls) ? item.rolls : []);
+
+            if (rollsForType.length === 0) {
+                noChartDataMessage.classList.remove('hidden');
+                totalRollsForChart.textContent = `Total d${selectedDiceType} rolls: 0`;
+                rollChartElement.style.height = '50px';
+                return;
+            }
+            
+            rollChartElement.style.height = '200px'; 
+            noChartDataMessage.classList.add('hidden');
+            totalRollsForChart.textContent = `Total d${selectedDiceType} rolls: ${rollsForType.length}`;
+
+            const plotData = rollsForType; 
+
+            if (!plotData || plotData.length === 0) { 
+                 noChartDataMessage.classList.remove('hidden');
+                 return;
+            }
+            
+            rollChartInstance = new Chart(rollChartContext, { 
+                type: chartType,
+                data: {
+                    labels: [`d${selectedDiceType} Rolls`], 
+                    datasets: [{
+                        label: `Distribution of d${selectedDiceType}`,
+                        data: [plotData], 
+                        backgroundColor: 'rgba(129, 140, 248, 0.3)', 
+                        borderColor: 'rgba(99, 102, 241, 1)',  
+                        borderWidth: 1,
+                    }]
+                },
+                options: { 
+                    responsive: true,
+                    maintainAspectRatio: false, 
+                    scales: {
+                        xAxes: [{ 
+                            ticks: {
+                                fontColor: '#9ca3af', 
+                                beginAtZero: false, 
+                                min: 1, 
+                                max: selectedDiceType, 
+                                stepSize: selectedDiceType > 20 ? Math.floor(selectedDiceType / 10) : 1 
+                            },
+                            gridLines: { 
+                                color: '#374151' 
+                            },
+                            scaleLabel: { 
+                                display: true,
+                                labelString: 'Roll Value', 
+                                fontColor: '#e2e8f0'
+                            }
+                        }],
+                        yAxes: [{ 
+                            ticks: {
+                                fontColor: '#9ca3af' 
+                            },
+                            gridLines: {
+                                display: false 
+                            },
+                            scaleLabel: {
+                                display: false, 
+                            }
+                        }]
+                    },
+                    legend: {
+                        labels: {
+                            fontColor: '#e2e8f0' 
+                        }
+                    },
+                    tooltips: {}
+                }
+            });
+        }
+
+        function updateRollButtonLabel() {
+            const num = numDiceInput.value || 'N';
+            const type = diceTypeInput.value || 'D';
+            rollButtonLabel.textContent = `${num}d${type}`;
+        }
+
+        function handleInputEnter(event) {
+            if (event.key === 'Enter' || event.keyCode === 13) {
+                event.preventDefault(); 
+                rollButton.click();
+            }
+        }
+
+        // --- Initial Setup ---
+        numDiceInput.addEventListener('input', updateRollButtonLabel);
+        diceTypeInput.addEventListener('input', updateRollButtonLabel);
+        
+        numDiceInput.addEventListener('keypress', handleInputEnter);
+        diceTypeInput.addEventListener('keypress', handleInputEnter);
+
+        rollButton.addEventListener('click', handleRoll);
+        clearHistoryButton.addEventListener('click', clearHistory);
+        visualizeDiceTypeSelect.addEventListener('change', updateVisualization);
+
+        // --- App Initialization ---
+        function main() {
+            updateRollButtonLabel();
+            loadHistory(); // Load history from localStorage on startup
+            // No Firebase init, no initial loading indicator for that.
+            hideLoading(); // Hide if it was somehow shown
+        }
+
+        main(); // No async operations in main that need .catch for now
+    </script>
+</body>
+</html>
