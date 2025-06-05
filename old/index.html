@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Rdice</title>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    <div class="wrapper">
+        <section class="type">
+            <label class="Dad" aria-label="Your Roll :">
+                <input type="text" value="1D30" id="DAD" maxlength="2" onkeydown="return false">
+            </label>                    
+        </section>
+        <section class="screen">
+            <label class="custom" aria-label="Your Roll :">
+                <input type="text" value="0" id="Cock" maxlength="2" onkeydown="return false">
+            </label>
+        </section>
+
+        <section class="MDice">
+            <button onclick="Sub()" class="Sub">
+                -
+            </button>
+            <button onclick="Add()" class="Add">
+                +
+            </button>
+        </section>
+        <section class="rollbutton">
+            <div class="RBR ">
+                <button onclick= "roll()" class="Roll"> 
+                    Roll
+                </button>
+                <button onclick= "dado()" class="Type">
+                    Type
+                </button>
+            </div>
+        </section>
+        <section class="hist">
+            <label class="pastnum">
+                <input type="text" value="0" id="PN" maxlength="2" onkeydown="return false">                
+            </label>
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
