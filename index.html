@@ -2,50 +2,88 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG Dice Roller</title>
     
-    <title>Rdice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+    <script src="https://unpkg.com/chartjs-chart-box-and-violin-plot/build/Chart.BoxPlot.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="style.css">
-
 </head>
-<body>
-    <div class="wrapper">
-        <section class="type">
-            <label class="Dad" aria-label="Your Roll :">
-                <input type="text" value="1D30" id="DAD" maxlength="2" onkeydown="return false">
-            </label>                    
-        </section>
-        <section class="screen">
-            <label class="custom" aria-label="Your Roll :">
-                <input type="text" value="0" id="Cock" maxlength="2" onkeydown="return false">
-            </label>
-        </section>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 selection:bg-indigo-500 selection:text-white">
 
-        <section class="MDice">
-            <button onclick="Sub()" class="Sub">
-                -
-            </button>
-            <button onclick="Add()" class="Add">
-                +
-            </button>
-        </section>
-        <section class="rollbutton">
-            <div class="RBR ">
-                <button onclick= "roll()" class="Roll"> 
-                    Roll
-                </button>
-                <button onclick= "dado()" class="Type">
-                    Type
-                </button>
+    <div id="loadingIndicator">Loading...</div>
+
+    <div class="w-full max-w-4xl mx-auto space-y-8">
+        <header class="text-center">
+            <h1 class="text-4xl font-bold text-indigo-400">RPG Dice Roller</h1>
+            <p class="text-gray-400 mt-2">Roll your fate, check your luck! (History is local)</p>
+        </header>
+
+        <main class="grid md:grid-cols-2 gap-8">
+            <section class="card space-y-6">
+                <h2 class="text-2xl font-semibold text-indigo-300">Roll the dice</h2>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="input-group">
+                        <label for="numDice" class="input-label">Number of Dice (1-100)</label>
+                        <input type="number" id="numDice" value="1" min="1" max="100" class="input-field" placeholder="e.g., 2">
+                    </div>
+                    <div class="input-group">
+                        <label for="diceType" class="input-label">Type of Dice (d<span id="diceTypeLabel">N</span>, min: d2)</label>
+                        <input type="number" id="diceType" value="6" min="2" class="input-field" placeholder="e.g., 20">
+                    </div>
+                </div>
+                <button id="rollButton" class="btn btn-primary w-full">Roll <span id="rollButtonLabel">1d6</span></button>
+
+                <div id="currentRollResult" class="mt-6 space-y-2 hidden">
+                    <h3 class="text-xl font-semibold text-indigo-300">Last Roll:</h3>
+                    <p class="text-lg">Total: <span id="rollTotal" class="font-bold text-2xl text-green-400">0</span></p>
+                    <p class="text-sm text-gray-400">Individual Rolls: <span id="individualRolls" class="text-gray-300"></span></p>
+                </div>
+            </section>
+
+            <section class="card space-y-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-semibold text-indigo-300">Roll History</h2>
+                    <button id="clearHistoryButton" class="btn btn-secondary btn-sm py-2 px-4 text-xs">Clear History</button>
+                </div>
+                <div id="rollHistory" class="history-scroll max-h-80 overflow-y-auto bg-gray-900 p-3 rounded-lg">
+                    <p id="noHistoryMessage" class="text-gray-500 text-center py-4">No rolls yet. Let's make some history!</p>
+                </div>
+            </section>
+        </main>
+
+        <section class="card mt-8">
+            <h2 id="visualizationTitle" class="text-2xl font-semibold text-indigo-300 mb-4">Roll Distribution (Horizontal Violin Plot)</h2>
+            <div class="flex flex-col sm:flex-row gap-4 mb-4 items-center">
+                <label for="visualizeDiceType" class="input-label">Show stats for:</label>
+                <select id="visualizeDiceType" class="input-field sm:w-auto bg-gray-700">
+                    <option value="">Select Dice Type</option>
+                </select>
+                <p id="totalRollsForChart" class="text-sm text-gray-400 ml-auto">Total rolls: 0</p>
+            </div>
+            <div class="bg-gray-900 p-4 rounded-lg min-h-[250px]">
+                <canvas id="rollChart" height="200"></canvas>
+                 <p id="noChartDataMessage" class="text-gray-500 text-center py-10">Roll some dice and select a type to see the visualization!</p>
             </div>
         </section>
-        <section class="hist">
-            <label class="pastnum">
-                <input type="text" value="0" id="PN" maxlength="2" onkeydown="return false">                
-            </label>
-        </section>
     </div>
+
+    <div id="messageModal" class="modal hidden opacity-0">
+        <div class="modal-content">
+            <h3 id="modalTitle" class="text-xl font-semibold mb-4">Notification</h3>
+            <p id="modalMessage" class="text-gray-300 mb-6">This is a message.</p>
+            <div class="flex justify-end space-x-3">
+                <button id="modalCancelButton" class="btn btn-secondary hidden">Cancel</button>
+                <button id="modalConfirmButton" class="btn btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
