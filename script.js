@@ -100,8 +100,8 @@ async function handleRoll() {
     const numDice = parseInt(numDiceInput.value);
     const diceType = parseInt(diceTypeInput.value);
 
-    if (isNaN(numDice) || numDice < 1 || numDice > 100000) {
-        showModal("Invalid Input", "Number of dice must be between 1 and 100000.");
+    if (isNaN(numDice) || numDice < 1 || numDice > 1000) {
+        showModal("Invalid Input", "Number of dice must be between 1 and 1000.");
         numDiceInput.focus();
         return;
     }
