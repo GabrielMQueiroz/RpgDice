@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparador de Fichas RPG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom Scrollbar for the table */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        
+        .glass-panel {
+            background: rgba(31, 41, 55, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(75, 85, 99, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans antialiased min-h-screen p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto space-y-6">
+        
+        <!-- Header -->
+        <header class="text-center pb-6 border-b border-gray-700">
+            <h1 class="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-cyan-400 tracking-tight">
+                Nexus de Entidades
+            </h1>
+            <p class="text-gray-400 mt-2">Plataforma de Análise e Comparação de Atributos</p>
+        </header>
+
+        <!-- Character Selection -->
+        <div class="space-y-2">
+            <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Selecionar Entidades</h2>
+            <div id="character-toggles" class="flex flex-wrap gap-3">
+                <!-- Toggles will be injected here via JS -->
+            </div>
+        </div>
+
+        <!-- Character Cards Summary -->
+        <div id="character-cards" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+            <!-- Cards will be injected here -->
+        </div>
+
+        <!-- Charts Area -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- Radar Chart (Attributes) -->
+            <div class="glass-panel p-4 md:p-6 rounded-2xl shadow-xl flex flex-col items-center">
+                <div class="w-full flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-gray-200">Distribuição de Atributos</h3>
+                </div>
+                
+                <!-- Category Filters -->
+                <div id="category-filters" class="flex flex-wrap justify-center gap-2 mb-4 w-full">
+                    <!-- Filters injected via JS -->
+                </div>
+
+                <div class="relative w-full aspect-square max-h-[400px]">
+                    <canvas id="radarChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Bar Chart (Levels) -->
+            <div class="glass-panel p-4 md:p-6 rounded-2xl shadow-xl flex flex-col">
+                <h3 class="text-lg font-bold text-gray-200 mb-6">Comparação de Nível</h3>
+                <div class="relative w-full h-full min-h-[300px]">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="glass-panel rounded-2xl shadow-xl overflow-hidden mt-8">
+            <div class="p-4 bg-gray-800 border-b border-gray-700">
+                <h3 class="text-lg font-bold text-gray-200">Matriz de Atributos (Color Coded)</h3>
+                <p class="text-xs text-gray-400 mt-1">
+                    <span class="text-yellow-400 font-bold">Lendário (>80)</span> | 
+                    <span class="text-purple-400 font-bold">Épico (>50)</span> | 
+                    <span class="text-blue-400">Raro (>20)</span> | 
+                    <span class="text-green-400">Incomum (>10)</span> | 
+                    <span class="text-gray-400">Comum (0-10)</span> | 
+                    <span class="text-red-500">Negativo</span>
+                </p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs text-gray-400 uppercase bg-gray-900/50" id="table-head">
+                        <!-- Head injected via JS -->
+                    </thead>
+                    <tbody class="divide-y divide-gray-700/50" id="table-body">
+                        <!-- Body injected via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Data Extraction
+        const rawData = [
+            {
+                id: 'gabriel', name: 'Gabriel', class: 'Shou-Gao I*', level: 600, color: '#f59e0b', // Amber
+                attributes: { Força: 30, Constituição: 30, Destreza: 30, Sorte: 15, Agilidade: 30, Sequência: 30, Inteligência: 90, Magia: 60, Autoridade: 60, Defesa: 30, Resistência: 30, Percepção: 30, Dedução: 30, Furtividade: 30, Presença: 60, Carisma: 30, Vontade: 30, Manejo: 30, Potencial: 60, Permissividade: 100, Naturalidade: 10, Ofício: 15, Crítico: 30, Sintonia: 1 }
+            },
+            {
+                id: 'normando', name: 'Normando', class: 'Protorieven Ilimitado I', level: 700, color: '#8b5cf6', // Violet
+                attributes: { Força: 1, Constituição: 1, Destreza: 1, Sorte: 10, Agilidade: 3, Sequência: 3, Inteligência: 1, Magia: 1, Autoridade: 70, Defesa: 2, Resistência: 1, Percepção: 1, Dedução: 2, Furtividade: 1, Presença: 3, Carisma: 5, Vontade: 30, Manejo: 1, Potencial: 1, Permissividade: 100, Naturalidade: 7, Ofício: 2, Crítico: 20, Sintonia: 0 }
+            },
+            {
+                id: 'alexandre', name: 'Alexandre', class: 'Aprendiz das Sombras II', level: 500, color: '#9ca3af', // Gray
+                attributes: { Força: 15, Constituição: 15, Destreza: 41, Sorte: 10, Agilidade: 20, Sequência: 25, Inteligência: 27, Magia: 18, Autoridade: 50, Defesa: 30, Resistência: 15, Percepção: 32, Dedução: 32, Furtividade: 0, Presença: 0, Carisma: 41, Vontade: 20, Manejo: 20, Potencial: 18, Permissividade: 65, Naturalidade: 1, Ofício: 4, Crítico: 20, Sintonia: 0 }
+            },
+            {
+                id: 'miguel', name: 'Miguel', class: 'Artífice Cromático II', level: 400, color: '#3b82f6', // Blue
+                attributes: { Força: 90, Constituição: 116, Destreza: 61, Sorte: 5, Agilidade: 98, Sequência: 12, Inteligência: 30, Magia: 135, Autoridade: 0, Defesa: 87, Resistência: 86, Percepção: 60, Dedução: 28, Furtividade: -30, Presença: 90, Carisma: 16, Vontade: 92, Manejo: 18, Potencial: 135, Permissividade: 0, Naturalidade: 3, Ofício: 3, Crítico: 15, Sintonia: 0 }
+            },
+            {
+                id: 'arfinis', name: 'Arfinis', class: 'Labirinto de Julveniiri II', level: 250, color: '#10b981', // Emerald
+                attributes: { Força: 7, Constituição: 14, Destreza: 15, Sorte: 8, Agilidade: 10, Sequência: 14, Inteligência: 17, Magia: 28, Autoridade: 0, Defesa: 14, Resistência: 7, Percepção: 19, Dedução: 22, Furtividade: 8, Presença: 18, Carisma: 13, Vontade: 20, Manejo: 7, Potencial: 28, Permissividade: 0, Naturalidade: 20, Ofício: 4, Crítico: 9, Sintonia: 0 }
+            },
+            {
+                id: 'veniiri', name: 'Veniiri', class: 'Labirinto de Julveniiri II', level: 150, color: '#14b8a6', // Teal
+                attributes: { Força: 18, Constituição: 12, Destreza: 14, Sorte: 9, Agilidade: 18, Sequência: 16, Inteligência: 10, Magia: 12, Autoridade: 0, Defesa: 12, Resistência: 12, Percepção: 13, Dedução: 13, Furtividade: 15, Presença: 7, Carisma: 14, Vontade: 8, Manejo: 5, Potencial: 12, Permissividade: 0, Naturalidade: 8, Ofício: 1, Crítico: 8, Sintonia: 0 }
+            },
+            {
+                id: 'victor', name: 'Victor', class: 'Desbravador Celeste I', level: 1000, color: '#ef4444', // Red
+                attributes: { Força: 64, Constituição: 75, Destreza: 64, Sorte: 9, Agilidade: 82, Sequência: 90, Inteligência: 30, Magia: 0, Autoridade: 100, Defesa: 82, Resistência: 75, Percepção: 30, Dedução: 25, Furtividade: 20, Presença: 30, Carisma: 30, Vontade: 30, Manejo: 0, Potencial: 0, Permissividade: 85, Naturalidade: 1, Ofício: 1, Crítico: 15, Sintonia: 0 }
+            },
+            {
+                id: 'iza', name: 'Iza', class: 'Exploradora I', level: 38, color: '#ec4899', // Pink
+                attributes: { Força: 8, Constituição: 4, Destreza: 11, Sorte: 3, Agilidade: 9, Sequência: 7, Inteligência: 9, Magia: 12, Autoridade: 0, Defesa: 7, Resistência: 5, Percepção: 8, Dedução: 6, Furtividade: 10, Presença: 4, Carisma: 6, Vontade: 8, Manejo: 6, Potencial: 9, Permissividade: 0, Naturalidade: 4, Ofício: 1, Crítico: 7, Sintonia: 0 }
+            }
+        ];
+
+        // Categories mapping
+        const attributeCategories = {
+            "Físico": ['Força', 'Constituição', 'Destreza', 'Agilidade', 'Defesa', 'Resistência'],
+            "Mental/Mágico": ['Inteligência', 'Magia', 'Percepção', 'Dedução', 'Vontade', 'Sintonia'],
+            "Social/Infl.": ['Autoridade', 'Presença', 'Carisma', 'Permissividade'],
+            "Combate": ['Sequência', 'Furtividade', 'Manejo', 'Potencial', 'Crítico'],
+            "Outros": ['Sorte', 'Naturalidade', 'Ofício']
+        };
+        const allAttributes = Object.values(attributeCategories).flat();
+
+        // State
+        let activeCharacters = rawData.map(c => c.id);
+        let activeCategory = "Físico";
+        let radarChartInstance = null;
+        let barChartInstance = null;
+
+        // Utility: Color Coding
+        function getValueColorClass(val) {
+            if (val >= 80) return 'text-yellow-400 font-bold drop-shadow-[0_0_5px_rgba(250,204,21,0.5)]';
+            if (val >= 50) return 'text-purple-400 font-semibold';
+            if (val >= 20) return 'text-blue-400';
+            if (val >= 10) return 'text-green-400';
+            if (val < 0) return 'text-red-500 font-semibold';
+            return 'text-gray-400';
+        }
+
+        // Initialize UI
+        function init() {
+            renderToggles();
+            renderCategoryFilters();
+            updateDashboard();
+        }
+
+        function toggleCharacter(id) {
+            if (activeCharacters.includes(id)) {
+                // Keep at least one active
+                if (activeCharacters.length > 1) {
+                    activeCharacters = activeCharacters.filter(cId => cId !== id);
+                }
+            } else {
+                activeCharacters.push(id);
+            }
+            renderToggles();
+            updateDashboard();
+        }
+
+        function setCategory(cat) {
+            activeCategory = cat;
+            renderCategoryFilters();
+            updateRadarChart();
+        }
+
+        function renderToggles() {
+            const container = document.getElementById('character-toggles');
+            container.innerHTML = '';
+            rawData.forEach(char => {
+                const isActive = activeCharacters.includes(char.id);
+                const btn = document.createElement('button');
+                btn.className = `px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 border border-transparent ${
+                    isActive ? 'opacity-100 shadow-lg scale-105' : 'opacity-40 grayscale hover:grayscale-0 hover:opacity-80'
+                }`;
+                btn.style.backgroundColor = isActive ? char.color + '40' : '#374151';
+                btn.style.borderColor = isActive ? char.color : 'transparent';
+                btn.style.color = isActive ? '#fff' : '#9ca3af';
+                
+                btn.innerHTML = `<span style="color: ${char.color}" class="mr-2">●</span>${char.name}`;
+                btn.onclick = () => toggleCharacter(char.id);
+                container.appendChild(btn);
+            });
+        }
+
+        function renderCategoryFilters() {
+            const container = document.getElementById('category-filters');
+            container.innerHTML = '';
+            
+            // Add "Todos" option
+            const allCats = ["Todos", ...Object.keys(attributeCategories)];
+            
+            allCats.forEach(cat => {
+                const isActive = activeCategory === cat;
+                const btn = document.createElement('button');
+                btn.className = `px-3 py-1 rounded-md text-xs transition-colors border ${
+                    isActive ? 'bg-gray-700 border-gray-500 text-white shadow-inner' : 'bg-transparent border-gray-700 text-gray-400 hover:text-white'
+                }`;
+                btn.innerText = cat;
+                btn.onclick = () => setCategory(cat);
+                container.appendChild(btn);
+            });
+        }
+
+        function renderCards() {
+            const container = document.getElementById('character-cards');
+            container.innerHTML = '';
+            
+            const activeData = rawData.filter(c => activeCharacters.includes(c.id));
+            activeData.forEach(char => {
+                const card = document.createElement('div');
+                card.className = 'glass-panel rounded-xl p-3 flex flex-col justify-center items-center text-center border-t-4';
+                card.style.borderTopColor = char.color;
+                
+                card.innerHTML = `
+                    <div class="text-xs text-gray-400 truncate w-full" title="${char.class}">${char.class}</div>
+                    <div class="font-bold text-md text-white mt-1">${char.name}</div>
+                    <div class="mt-2 px-2 py-1 bg-gray-800 rounded-md flex flex-col items-center border border-gray-700 w-full">
+                        <span class="text-[10px] text-gray-500 uppercase">Level</span>
+                        <span class="font-bold text-lg" style="color: ${char.color}">${char.level}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function updateRadarChart() {
+            const activeData = rawData.filter(c => activeCharacters.includes(c.id));
+            const labels = activeCategory === "Todos" ? allAttributes : attributeCategories[activeCategory];
+            
+            const datasets = activeData.map(char => {
+                return {
+                    label: char.name,
+                    data: labels.map(attr => char.attributes[attr] || 0),
+                    backgroundColor: char.color + '40', // 40% opacity
+                    borderColor: char.color,
+                    pointBackgroundColor: char.color,
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: char.color,
+                    borderWidth: 2,
+                };
+            });
+
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            
+            if (radarChartInstance) {
+                radarChartInstance.destroy();
+            }
+
+            // Global defaults for dark mode chart
+            Chart.defaults.color = '#9ca3af';
+            Chart.defaults.font.family = 'ui-sans-serif, system-ui, sans-serif';
+
+            radarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            pointLabels: {
+                                font: { size: 11, weight: '600' },
+                                color: '#d1d5db'
+                            },
+                            ticks: {
+                                display: false,
+                                backdropColor: 'transparent'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15 } },
+                        tooltip: { backgroundColor: 'rgba(17, 24, 39, 0.9)', titleColor: '#fff', bodyColor: '#ccc', padding: 10 }
+                    }
+                }
+            });
+        }
+
+        function updateBarChart() {
+            const activeData = rawData.filter(c => activeCharacters.includes(c.id));
+            
+            // Sort by level descending
+            const sortedData = [...activeData].sort((a, b) => b.level - a.level);
+
+            const ctx = document.getElementById('barChart').getContext('2d');
+            
+            if (barChartInstance) {
+                barChartInstance.destroy();
+            }
+
+            barChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sortedData.map(c => c.name),
+                    datasets: [{
+                        label: 'Nível',
+                        data: sortedData.map(c => c.level),
+                        backgroundColor: sortedData.map(c => c.color + 'CC'),
+                        borderColor: sortedData.map(c => c.color),
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y', // Horizontal bar chart
+                    scales: {
+                        x: { grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+                        y: { grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { backgroundColor: 'rgba(17, 24, 39, 0.9)' }
+                    }
+                }
+            });
+        }
+
+        function renderTable() {
+            const activeData = rawData.filter(c => activeCharacters.includes(c.id));
+            
+            // Render Head
+            const thead = document.getElementById('table-head');
+            let headHTML = '<tr><th class="px-4 py-3 bg-gray-800/50 rounded-tl-lg font-bold">Atributo</th>';
+            activeData.forEach(char => {
+                headHTML += `<th class="px-4 py-3 text-center whitespace-nowrap"><span style="color: ${char.color}">●</span> ${char.name}</th>`;
+            });
+            headHTML += '</tr>';
+            thead.innerHTML = headHTML;
+
+            // Render Body
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            
+            allAttributes.forEach(attr => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-800/50 transition-colors";
+                
+                // Attribute Name Column
+                let rowHTML = `<td class="px-4 py-3 font-medium text-gray-300 border-r border-gray-800">${attr}</td>`;
+                
+                // Values
+                activeData.forEach(char => {
+                    const val = char.attributes[attr] || 0;
+                    const colorClass = getValueColorClass(val);
+                    rowHTML += `<td class="px-4 py-3 text-center ${colorClass}">${val}</td>`;
+                });
+                
+                tr.innerHTML = rowHTML;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateDashboard() {
+            renderCards();
+            updateRadarChart();
+            updateBarChart();
+            renderTable();
+        }
+
+        // Run
+        window.onload = init;
+    </script>
+</body>
+</html>

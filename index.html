@@ -3,76 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RPGDice</title>
+    <meta name="description" content="RPG Dice Roller and Nexus de Entidades - A platform for rolling dice and comparing RPG characters.">
+    <title>RPGDice & Nexus</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
-    <script src="https://unpkg.com/chartjs-chart-box-and-violin-plot/build/Chart.BoxPlot.min.js"></script>
+    <!-- Chart.js v4 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4 selection:bg-indigo-500 selection:text-white">
+<body class="min-h-screen flex flex-col items-center bg-gray-900 text-gray-100 p-4 selection:bg-indigo-500 selection:text-white">
 
     <div id="loadingIndicator">Loading...</div>
 
-    <div class="w-full max-w-4xl mx-auto space-y-8">
-        <header class="text-center">
-            <h1 class="text-4xl font-bold text-indigo-400">RPG Dice Roller</h1>
-            <p class="text-gray-400 mt-2">Roll your fate, check your luck! (History is local)</p>
-        </header>
+    <div class="w-full max-w-7xl mx-auto space-y-6">
+        
+        <!-- Tab Navigation -->
+        <div class="flex justify-center space-x-2 mb-8 border-b border-gray-700 pb-2">
+            <button id="tab-btn-roller" class="tab-btn active px-6 py-2 text-lg font-semibold rounded-t-lg transition-colors border-b-2 border-indigo-500 text-indigo-400" onclick="switchTab('roller')">🎲 Dice Roller</button>
+            <button id="tab-btn-nexus" class="tab-btn px-6 py-2 text-lg font-semibold rounded-t-lg transition-colors border-b-2 border-transparent text-gray-400 hover:text-white" onclick="switchTab('nexus')">⚔️ Nexus de Entidades</button>
+        </div>
 
-        <main class="grid md:grid-cols-2 gap-8">
-            <section class="card space-y-6">
-                <h2 class="text-2xl font-semibold text-indigo-300">Roll the dice</h2>
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="input-group">
-                        <label for="numDice" class="input-label">Number of Dice (1-1000)</label>
-                        <input type="number" id="numDice" value="1" min="1" max="1000" class="input-field" placeholder="e.g., 2">
+        <!-- TAB: Dice Roller -->
+        <div id="tab-roller" class="tab-panel active space-y-8 max-w-4xl mx-auto">
+            <header class="text-center">
+                <h1 class="text-4xl font-bold text-indigo-400">RPG Dice Roller</h1>
+                <p class="text-gray-400 mt-2">Roll your fate, check your luck! (History is local)</p>
+            </header>
+
+            <main class="grid md:grid-cols-2 gap-8">
+                <section class="card space-y-6">
+                    <h2 class="text-2xl font-semibold text-indigo-300">Roll the dice</h2>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="input-group">
+                            <label for="numDice" class="input-label">Number of Dice (1-1000)</label>
+                            <input type="number" id="numDice" value="1" min="1" max="1000" class="input-field" placeholder="e.g., 2">
+                        </div>
+                        <div class="input-group">
+                            <label for="diceType" class="input-label">Type of Dice (d<span id="diceTypeLabel">N</span>, min: d2)</label>
+                            <input type="number" id="diceType" value="6" min="2" class="input-field" placeholder="e.g., 20">
+                        </div>
                     </div>
-                    <div class="input-group">
-                        <label for="diceType" class="input-label">Type of Dice (d<span id="diceTypeLabel">N</span>, min: d2)</label>
-                        <input type="number" id="diceType" value="6" min="2" class="input-field" placeholder="e.g., 20">
+                    <button id="rollButton" class="btn btn-primary w-full">Roll <span id="rollButtonLabel">1d6</span></button>
+
+                    <div id="currentRollResult" class="mt-6 space-y-2 hidden">
+                        <h3 class="text-xl font-semibold text-indigo-300">Last Roll:</h3>
+                        <p class="text-lg">Total: <span id="rollTotal" class="font-bold text-2xl text-green-400">0</span></p>
+                        <p class="text-sm text-gray-400">Individual Rolls: <span id="individualRolls" class="text-gray-300"></span></p>
                     </div>
+                </section>
+
+                <section class="card space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-semibold text-indigo-300">Roll History <span id="historyCount" class="text-sm font-normal text-gray-400"></span></h2>
+                        <button id="clearHistoryButton" class="btn btn-secondary btn-sm py-2 px-4 text-xs">Clear History</button>
+                    </div>
+                    <div id="rollHistory" class="history-scroll max-h-80 overflow-y-auto bg-gray-900 p-3 rounded-lg">
+                        <p id="noHistoryMessage" class="text-gray-500 text-center py-4">No rolls yet. Let's make some history!</p>
+                    </div>
+                </section>
+            </main>
+
+            <section class="card mt-8">
+                <h2 id="visualizationTitle" class="text-2xl font-semibold text-indigo-300 mb-4">Roll Distribution</h2>
+                <div class="flex flex-col sm:flex-row gap-4 mb-4 items-center">
+                    <label for="visualizeDiceType" class="input-label">Show stats for:</label>
+                    <select id="visualizeDiceType" class="input-field sm:w-auto bg-gray-700">
+                        <option value="">Select Dice Type</option>
+                    </select>
+                    <p id="totalRollsForChart" class="text-sm text-gray-400 ml-auto">Total rolls: 0</p>
                 </div>
-                <button id="rollButton" class="btn btn-primary w-full">Roll <span id="rollButtonLabel">1d6</span></button>
-
-                <div id="currentRollResult" class="mt-6 space-y-2 hidden">
-                    <h3 class="text-xl font-semibold text-indigo-300">Last Roll:</h3>
-                    <p class="text-lg">Total: <span id="rollTotal" class="font-bold text-2xl text-green-400">0</span></p>
-                    <p class="text-sm text-gray-400">Individual Rolls: <span id="individualRolls" class="text-gray-300"></span></p>
+                <div class="bg-gray-900 p-4 rounded-lg min-h-[300px]">
+                    <canvas id="rollChart" height="250"></canvas>
+                     <p id="noChartDataMessage" class="text-gray-500 text-center py-10">Roll some dice and select a type to see the visualization!</p>
                 </div>
             </section>
+        </div>
 
-            <section class="card space-y-4">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-2xl font-semibold text-indigo-300">Roll History</h2>
-                    <button id="clearHistoryButton" class="btn btn-secondary btn-sm py-2 px-4 text-xs">Clear History</button>
-                </div>
-                <div id="rollHistory" class="history-scroll max-h-80 overflow-y-auto bg-gray-900 p-3 rounded-lg">
-                    <p id="noHistoryMessage" class="text-gray-500 text-center py-4">No rolls yet. Let's make some history!</p>
-                </div>
-            </section>
-        </main>
+        <!-- TAB: Nexus de Entidades -->
+        <div id="tab-nexus" class="tab-panel hidden space-y-6">
+            <header class="text-center pb-6 border-b border-gray-700">
+                <h1 class="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-cyan-400 tracking-tight">
+                    Nexus de Entidades
+                </h1>
+                <p class="text-gray-400 mt-2">Plataforma de Análise e Comparação de Atributos</p>
+            </header>
 
-        <section class="card mt-8">
-            <h2 id="visualizationTitle" class="text-2xl font-semibold text-indigo-300 mb-4">Roll Distribution</h2>
-            <div class="flex flex-col sm:flex-row gap-4 mb-4 items-center">
-                <label for="visualizeDiceType" class="input-label">Show stats for:</label>
-                <select id="visualizeDiceType" class="input-field sm:w-auto bg-gray-700">
-                    <option value="">Select Dice Type</option>
-                </select>
-                <p id="totalRollsForChart" class="text-sm text-gray-400 ml-auto">Total rolls: 0</p>
+            <div class="space-y-2">
+                <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Selecionar Entidades</h2>
+                <div id="character-toggles" class="flex flex-wrap gap-3">
+                    <!-- Toggles injected here via JS -->
+                </div>
             </div>
-            <div class="bg-gray-900 p-4 rounded-lg min-h-[250px]">
-                <canvas id="rollChart" height="200"></canvas>
-                 <p id="noChartDataMessage" class="text-gray-500 text-center py-10">Roll some dice and select a type to see the visualization!</p>
+
+            <div id="character-cards" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                <!-- Cards injected here -->
             </div>
-        </section>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Radar Chart -->
+                <div class="glass-panel p-4 md:p-6 rounded-2xl shadow-xl flex flex-col items-center">
+                    <div class="w-full flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-gray-200">Distribuição de Atributos</h3>
+                    </div>
+                    <div id="category-filters" class="flex flex-wrap justify-center gap-2 mb-4 w-full">
+                        <!-- Filters injected via JS -->
+                    </div>
+                    <div class="relative w-full aspect-square max-h-[400px]">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Bar Chart -->
+                <div class="glass-panel p-4 md:p-6 rounded-2xl shadow-xl flex flex-col">
+                    <h3 class="text-lg font-bold text-gray-200 mb-6">Comparação de Nível</h3>
+                    <div class="relative w-full h-full min-h-[300px]">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="glass-panel rounded-2xl shadow-xl overflow-hidden mt-8">
+                <div class="p-4 bg-gray-800 border-b border-gray-700">
+                    <h3 class="text-lg font-bold text-gray-200">Matriz de Atributos (Color Coded)</h3>
+                    <p class="text-xs text-gray-400 mt-1">
+                        <span class="text-yellow-400 font-bold">Lendário (>80)</span> | 
+                        <span class="text-purple-400 font-bold">Épico (>50)</span> | 
+                        <span class="text-blue-400">Raro (>20)</span> | 
+                        <span class="text-green-400">Incomum (>10)</span> | 
+                        <span class="text-gray-400">Comum (0-10)</span> | 
+                        <span class="text-red-500">Negativo</span>
+                    </p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-gray-400 uppercase bg-gray-900/50" id="table-head">
+                            <!-- Head injected via JS -->
+                        </thead>
+                        <tbody class="divide-y divide-gray-700/50" id="table-body">
+                            <!-- Body injected via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
 
+    <!-- Modals -->
     <div id="messageModal" class="modal hidden opacity-0">
         <div class="modal-content">
             <h3 id="modalTitle" class="text-xl font-semibold mb-4">Notification</h3>
