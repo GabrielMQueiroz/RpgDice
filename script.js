@@ -96,9 +96,13 @@ function hideModal() {
 function rollDice(numDice, diceType) {
     const rolls = [];
     let total = 0;
+    const randomBuffer = new Uint32Array(numDice);
+    window.crypto.getRandomValues(randomBuffer);
     for (let i = 0; i < numDice; i++) {
-        rolls.push(Math.floor(Math.random() * diceType) + 1);
-        total += rolls[i];
+        const randomValue = randomBuffer[i] / (0xffffffff + 1);
+        const roll = Math.floor(randomValue * diceType) + 1;
+        rolls.push(roll);
+        total += roll;
     }
     return { rolls, total };
 }
