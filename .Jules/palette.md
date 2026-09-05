@@ -1,0 +1,3 @@
+## 2024-05-24 - Semantic ARIA and Keyboard Navigation for Tabs
+**Learning:** Custom tab implementations often miss semantic ARIA roles (`tablist`, `tab`, `tabpanel`) and dynamic states (`aria-selected`). Additionally, keyboard focus needs explicit styling, especially when using utility-first frameworks like Tailwind which often reset default browser focus rings.
+**Action:** Always include complete ARIA patterns (roles and connections like `aria-controls` / `aria-labelledby`) for custom widgets. Ensure dynamic attributes like `aria-selected` are updated via JavaScript. Use explicit focus styles (e.g., `focus-visible:ring-2`) to guarantee visibility for keyboard navigation.
