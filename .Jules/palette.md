@@ -1,0 +1,3 @@
+## 2024-05-24 - Focus States and Hidden Shortcuts
+**Learning:** Many interactive elements lacked clear focus states, making keyboard navigation difficult. Furthermore, some components had hidden keyboard shortcuts (like "Enter" to roll dice) that were not visually communicated to the user.
+**Action:** Always ensure `focus-visible` styles are implemented on all interactive elements (buttons, inputs, tabs). When implementing keyboard shortcuts, surface them visually in the UI (e.g., using `<kbd>` tags) so users know they exist.
