@@ -23,8 +23,8 @@
         
         <!-- Tab Navigation -->
         <div class="flex justify-center space-x-2 mb-8 border-b border-gray-700 pb-2">
-            <button id="tab-btn-roller" class="tab-btn active px-6 py-2 text-lg font-semibold rounded-t-lg transition-colors border-b-2 border-indigo-500 text-indigo-400" onclick="switchTab('roller')">🎲 Dice Roller</button>
-            <button id="tab-btn-nexus" class="tab-btn px-6 py-2 text-lg font-semibold rounded-t-lg transition-colors border-b-2 border-transparent text-gray-400 hover:text-white" onclick="switchTab('nexus')">⚔️ Nexus de Entidades</button>
+            <button id="tab-btn-roller" class="tab-btn active px-6 py-2 text-lg font-semibold rounded-t-lg transition-colors border-b-2 border-indigo-500 text-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900" onclick="switchTab('roller')">🎲 Dice Roller</button>
+            <button id="tab-btn-nexus" class="tab-btn px-6 py-2 text-lg font-semibold rounded-t-lg transition-colors border-b-2 border-transparent text-gray-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900" onclick="switchTab('nexus')">⚔️ Nexus de Entidades</button>
         </div>
 
         <!-- TAB: Dice Roller -->
@@ -47,7 +47,7 @@
                             <input type="number" id="diceType" value="6" min="2" class="input-field" placeholder="e.g., 20">
                         </div>
                     </div>
-                    <button id="rollButton" class="btn btn-primary w-full">Roll <span id="rollButtonLabel">1d6</span></button>
+                    <button id="rollButton" class="btn btn-primary w-full">Roll <span id="rollButtonLabel">1d6</span><kbd class="text-xs ml-2 text-gray-300 font-normal border border-gray-500 rounded px-1.5 py-0.5 bg-gray-700">Enter</kbd></button>
 
                     <div id="currentRollResult" class="mt-6 space-y-2 hidden">
                         <h3 class="text-xl font-semibold text-indigo-300">Last Roll:</h3>

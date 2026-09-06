@@ -450,7 +450,7 @@ function renderToggles() {
     rawData.forEach(char => {
         const isActive = activeCharacters.includes(char.id);
         const btn = document.createElement('button');
-        btn.className = `px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 border border-transparent ${
+        btn.className = `px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 border border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 focus-visible:ring-gray-400 ${
             isActive ? 'opacity-100 shadow-lg scale-105' : 'opacity-40 grayscale hover:grayscale-0 hover:opacity-80'
         }`;
         btn.style.backgroundColor = isActive ? char.color + '40' : '#374151';
@@ -473,7 +473,7 @@ function renderCategoryFilters() {
     allCats.forEach(cat => {
         const isActive = activeCategory === cat;
         const btn = document.createElement('button');
-        btn.className = `px-3 py-1 rounded-md text-xs transition-colors border ${
+        btn.className = `px-3 py-1 rounded-md text-xs transition-colors border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 focus-visible:ring-gray-400 ${
             isActive ? 'bg-gray-700 border-gray-500 text-white shadow-inner' : 'bg-transparent border-gray-700 text-gray-400 hover:text-white'
         }`;
         btn.innerText = cat;
