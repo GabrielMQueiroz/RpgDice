@@ -1,0 +1,3 @@
+## 2024-05-18 - Semantic ARIA roles for custom tab implementations
+**Learning:** When using custom `div` and `button` structures to simulate a tabbed interface (rather than native semantic HTML elements), screen readers are unable to correctly interpret the structure and functionality unless proper ARIA roles (`tablist`, `tab`, `tabpanel`) and states (`aria-selected`, `aria-controls`) are explicitly defined and actively managed through JavaScript. Additionally, interactive tabs must provide visible focus indicators for keyboard users to navigate successfully.
+**Action:** Always ensure that custom tab components implement full WAI-ARIA tab semantics and synchronize state updates via Javascript, while adding visible focus states.
