@@ -1,0 +1,3 @@
+## 2024-06-25 - Custom Tab Navigation Accessibility
+**Learning:** Custom UI components like tabs often lack semantic meaning by default. Simply relying on visual cues (like an active tab color) leaves screen reader users behind. Also, custom buttons and links lose native focus styling if global resets hide outlines.
+**Action:** Always apply explicit ARIA roles (`role="tablist"`, `role="tab"`, `role="tabpanel"`) and state attributes (`aria-selected`, `aria-controls`) to custom navigational structures. Ensure keyboard users have explicit `:focus-visible` styles on all interactive elements.
