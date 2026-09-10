@@ -44,9 +44,11 @@ function switchTab(tabId) {
         if (t === tabId) {
             btn.classList.add('border-indigo-500', 'text-indigo-400');
             btn.classList.remove('border-transparent', 'text-gray-400');
+            btn.setAttribute('aria-selected', 'true');
         } else {
             btn.classList.remove('border-indigo-500', 'text-indigo-400');
             btn.classList.add('border-transparent', 'text-gray-400');
+            btn.setAttribute('aria-selected', 'false');
         }
     });
 

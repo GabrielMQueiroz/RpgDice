@@ -1,0 +1,5 @@
+## 2024-03-24 - Custom Tabs Accessibility and Focus States
+
+**Learning:** When implementing custom tab navigation, standard semantic HTML (`<button>`) is not enough for screen readers to understand the structure. The tabs require `role="tablist"`, `role="tab"`, `role="tabpanel"`, `aria-controls`, `aria-labelledby`, and dynamically updated `aria-selected` attributes. Additionally, components that visually style away outlines (like `outline: 2px solid transparent` on `.btn`) completely break keyboard accessibility unless explicit `:focus-visible` fallbacks are provided.
+
+**Action:** Always verify keyboard focus visibility when removing standard outlines or applying custom focus rings. When building non-standard interactive structures like tabs or carousels, consult WAI-ARIA authoring practices to ensure correct roles, states, and relationships are explicitly declared.
