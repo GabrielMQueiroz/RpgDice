@@ -1,0 +1,3 @@
+## 2024-03-21 - Custom UI components missing native accessibility traits
+**Learning:** The application uses custom CSS and native elements, but misses key accessibility features by default: buttons lacking standard `focus-visible` outlines due to explicit override, dynamic areas updating quietly without `aria-live`, and custom modals missing foundational `role="dialog"` traits.
+**Action:** When implementing custom UI components (like modals or status messages) or resetting focus outlines in custom styles, always ensure ARIA equivalents (`role="dialog"`, `aria-live`) are added and visual focus indicators (`focus-visible`) are restored to maintain keyboard and screen reader accessibility.
