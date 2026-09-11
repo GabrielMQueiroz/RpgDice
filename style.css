@@ -18,6 +18,10 @@ body {
     outline-offset: 2px;
 }
 
+.btn:focus-visible {
+    outline-color: #818cf8; /* indigo-400 */
+}
+
 .btn-primary {
     background-color: #4f46e5; /* indigo-600 */
 }
