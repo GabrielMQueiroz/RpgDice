@@ -1,0 +1,3 @@
+## 2024-06-25 - Dynamic Results Announcements
+**Learning:** Screen reader users can easily miss dynamic updates on the page that do not trigger focus changes or page reloads (e.g., dice roll results appearing dynamically). Adding `aria-live="polite"` and `aria-atomic="true"` on the container ensures they are properly announced.
+**Action:** When creating elements that present dynamic outcomes or notifications, remember to wrap them in an `aria-live` region to inform assistive technologies.
