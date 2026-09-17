@@ -1,0 +1,3 @@
+## 2024-06-25 - Custom Toggle Buttons Accessibility
+**Learning:** Visually active custom toggle buttons (like those dynamically generated for characters and categories) need `aria-pressed` attributes and strong `focus-visible` states to be accessible to screen readers and keyboard users. Without them, screen readers don't know the button's state, and keyboard users can't see which element is focused.
+**Action:** Always include `aria-pressed` based on the active state and `focus-visible` classes (like `focus-visible:ring-2`) when creating custom toggle buttons.
